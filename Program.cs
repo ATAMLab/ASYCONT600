@@ -5,40 +5,36 @@ using System.Text;
 String deviceIpAddress = "10.0.0.20";
 Int32  devicePort      = 4000;
 
-Dictionary<String, String> moves = new()
-{
-  { "abs", "MoveAbs" },
-  { "rel", "MoveRel" }
-};
+Int32 acknowledge_count = 6;
 
 Dictionary<String, String> axes = new()
 {
-  { "x", "1" },
-  { "y", "2" },
-  { "z", "3" },
-  { "pol", "4" },
-  { "slide", "5" },
+  { "x",       "1" },
+  { "y",       "2" },
+  { "z",       "3" },
+  { "pol",     "4" },
+  { "slide",   "5" },
   { "azimuth", "6" },
 };
 
 Dictionary<String, String> axesSafeAcceleration = new()
 {
-  { "x", "0.05" },
-  { "y", "0.1" },
-  { "z", "0.1" },
-  { "pol", "10" },
-  { "slide", "0.01" },
-  { "azimuth", "1" },
+  { "x",       "0.05" },
+  { "y",       "0.1"  },
+  { "z",       "0.1"  },
+  { "pol",     "10"   },
+  { "slide",   "0.01" },
+  { "azimuth", "1"    },
 };
 
 Dictionary<String, String> axesSafeSpeed = new()
 {
-  { "x", "0.1" },
-  { "y", "0.2" },
-  { "z", "0.02" },
-  { "pol", "10" },
-  { "slide", "0.01" },
-  { "azimuth", "1" },
+  { "x",        "0.1"  },
+  { "y",        "0.2"  },
+  { "z",        "0.02" },
+  { "pol",      "10"   },
+  { "slide",    "0.01" },
+  { "azimuth",  "1"    },
 };
 
 try
@@ -136,13 +132,12 @@ catch (SocketException e)
 
 Double get_position(NetworkStream net_stream, String axis)
 {
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
+	for (int i = 0; i < acknowledge_count; i++)
+	{
+		acknowledge(net_stream);
+	}
 
-  XmlDocument doc = new XmlDocument();
+	XmlDocument doc = new XmlDocument();
   XmlElement  state;
   XmlElement  section;
   XmlElement  query;
@@ -170,7 +165,9 @@ Double get_position(NetworkStream net_stream, String axis)
   entry = doc.SelectSingleNode("//par//section//entry") ?? doc.CreateElement("error");
   try
   {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
     return Convert.ToDouble(entry.Attributes["v1"].InnerText.Substring(0, Math.Min(entry.Attributes["v1"].InnerText.Length,entry.Attributes["v1"].InnerText.IndexOf('.') + 5)));
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
   }
   catch (System.NullReferenceException e)
   {
@@ -181,13 +178,12 @@ Double get_position(NetworkStream net_stream, String axis)
 
 void move_to(NetworkStream net_stream, String axis, Double position)
 {
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
+	for (int i = 0; i < acknowledge_count; i++)
+	{
+		acknowledge(net_stream);
+	}
 
-  XmlDocument doc = new XmlDocument();
+	XmlDocument doc = new XmlDocument();
   XmlElement  el  = doc.CreateElement("command");
 
   el.SetAttribute("name", "MoveAbs");
@@ -210,11 +206,10 @@ void move_to(NetworkStream net_stream, String axis, Double position)
 
 Double get_lower_limit(NetworkStream net_stream, String axis)
 {
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
+  for (int i = 0; i<acknowledge_count; i++)
+  {
+		acknowledge(net_stream);
+	}
 
   XmlDocument doc = new XmlDocument();
   XmlElement  state;
@@ -244,7 +239,11 @@ Double get_lower_limit(NetworkStream net_stream, String axis)
   entry = doc.SelectSingleNode("//par//section//entry") ?? doc.CreateElement("error");
   try
   {
-    return Convert.ToDouble(entry.Attributes["min"].InnerText.Substring(0, entry.Attributes["min"].InnerText.IndexOf('.') + 5));
+#pragma warning disable IDE0057 // Use range operator
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+    return Convert.ToDouble(entry.Attributes?["min"]?.InnerText.Substring(0, entry.Attributes["min"].InnerText.IndexOf('.') + 5));
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore IDE0057 // Use range operator
   }
   catch (System.NullReferenceException e)
   {
@@ -254,11 +253,11 @@ Double get_lower_limit(NetworkStream net_stream, String axis)
 }
 
 void quick_stop(NetworkStream net_stream, String axis) {
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
+	for (int i = 0; i < acknowledge_count; i++)
+	{
+		acknowledge(net_stream);
+	}
+
   XmlDocument doc = new XmlDocument();
   XmlElement  el  = doc.CreateElement("command");
   el.SetAttribute("name", "QuickStop");
@@ -268,11 +267,11 @@ void quick_stop(NetworkStream net_stream, String axis) {
 }
 
 void home(NetworkStream net_stream, String axis) {
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
+	for (int i = 0; i < acknowledge_count; i++)
+	{
+		acknowledge(net_stream);
+	}
+
   XmlDocument doc = new XmlDocument();
   XmlElement  el  = doc.CreateElement("command");
   el.SetAttribute("name", "Reference");
@@ -282,12 +281,12 @@ void home(NetworkStream net_stream, String axis) {
 }
 
 void set_reference(NetworkStream net_stream, String axis, Double offset) {
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  acknowledge(net_stream);
-  XmlDocument doc = new XmlDocument();
+	for (int i = 0; i < acknowledge_count; i++)
+	{
+		acknowledge(net_stream);
+	}
+
+	XmlDocument doc = new XmlDocument();
   XmlElement el   = doc.CreateElement("command");
   el.SetAttribute("name", "Reference");
   el.SetAttribute("axis", "Axis " + axes[axis]);
@@ -303,4 +302,3 @@ void acknowledge(NetworkStream net_stream) {
   doc.AppendChild(el);
   net_stream.Write(Encoding.ASCII.GetBytes(doc.OuterXml.ToString()));
 }
-
