@@ -50,32 +50,32 @@ try
   builder.Logging.AddJsonConsole();
   var app = builder.Build();
 
-  app.MapPut("/move/{move}/{axis}/{pos}", (String axis, String move, String pos) =>
+  app.MapPut("/move/{move_type}/{axis}/{position}", (String axis, String move_type, String position) =>
   {
     if (!axes.TryGetValue(axis, out string? value))
     {
-      return "Axis not found.";
+      return Results.Json("{ 'error': 'Axis not found'}", contentType: "application/json");
     }
 
-    if (move == "relative")
+    if (move_type == "relative")
     {
-      move_to(net_stream, axis, get_position(net_stream, axis)+Convert.ToDouble(pos));
+      move_to(net_stream, axis, get_position(net_stream, axis)+Convert.ToDouble(position));
     }
     else 
     {
-      move_to(net_stream, axis, Convert.ToDouble(pos));
+      move_to(net_stream, axis, Convert.ToDouble(position));
     }
-    return "";
+    return Results.Json("{}", contentType: "application/json");
   });
 
-  app.MapPut("/reference/{axis}/{pos}", (String axis, String pos) =>
+  app.MapPut("/reference/{axis}/{position}", (String axis, String position) =>
   {
     if (!axes.TryGetValue(axis, out string? value))
     {
-      return "Axis not found.";
+      return Results.Json("{ 'error': 'Axis not found'}", contentType: "application/json");
     }
-    set_reference(net_stream, axis, Convert.ToDouble(pos));
-    return "";
+    set_reference(net_stream, axis, Convert.ToDouble(position));
+    return Results.Json("{}", contentType: "application/json");
   });
 
   
@@ -83,10 +83,10 @@ try
   {
     if (!axes.TryGetValue(axis, out string? value))
     {
-      return "Axis not found.";
+      return Results.Json("{ 'error': 'Axis not found'}", contentType: "application/json");
     }
     home(net_stream, axis);
-    return "";
+    return Results.Json("{}", contentType: "application/json");
   });
   
   app.MapPut("/quick_stop", () =>
@@ -97,24 +97,24 @@ try
     quick_stop(net_stream, "pol");
     quick_stop(net_stream, "slide");
     quick_stop(net_stream, "azimuth");
-    return "";
+    return Results.Json("{}", contentType: "application/json");
   });
 
   app.MapPut("/quick_stop/{axis}", (String axis) =>
   {
     if (!axes.TryGetValue(axis, out string? value))
     {
-      return "Axis not found.";
+      return Results.Json("{ 'error': 'Axis not found'}", contentType: "application/json");
     }
     quick_stop(net_stream, axis);
-    return "";
+    return Results.Json("{}", contentType: "application/json");
   });
   
   app.MapPut("/bringxy", () =>
   {
     move_to(net_stream, "x", get_lower_limit(net_stream, "x"));
     move_to(net_stream, "y", get_lower_limit(net_stream, "y")+0.5);
-    return "";
+    return Results.Json("{}", contentType: "application/json");
   });
 
 	app.MapDelete("/", () => "Hello World!");
@@ -239,11 +239,9 @@ Double get_lower_limit(NetworkStream net_stream, String axis)
   entry = doc.SelectSingleNode("//par//section//entry") ?? doc.CreateElement("error");
   try
   {
-#pragma warning disable IDE0057 // Use range operator
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-    return Convert.ToDouble(entry.Attributes?["min"]?.InnerText.Substring(0, entry.Attributes["min"].InnerText.IndexOf('.') + 5));
+    return Convert.ToDouble(entry.Attributes?["min"]?.InnerText[..(entry.Attributes["min"].InnerText.IndexOf('.') + 5)]);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-#pragma warning restore IDE0057 // Use range operator
   }
   catch (System.NullReferenceException e)
   {
