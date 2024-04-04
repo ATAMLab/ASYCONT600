@@ -31,6 +31,6 @@ PUT {{Host_Address}}/bringxy
                   
 PUT {{Host_Address}}/home/z
 
-### Z Axis Reference
+### Z Axis Move
                   
 PUT {{Host_Address}}/move/relative/z/0.1
