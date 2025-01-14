@@ -10,12 +10,6 @@ from asycont600 import Asycont600_2
 cont = Asycont600_2()
 cont.connect()
 cont.move_abs("x", 2)
-while cont.get_position("x") != 2.000:
-  time.sleep(0.1)
-# time.sleep(5)
-# cont.set_ref0("x")
-# time.sleep(3)
-print("%.3f"%cont.get_position("x"))
 # cont.set_ref0("y")
 cont.disconnect()
 

@@ -1,7 +1,8 @@
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import socket
+import time
 import xml.etree.ElementTree as ET
 import xml.etree.ElementTree as ElementTree
 
@@ -39,14 +40,16 @@ class Asycont600_2:
     xmls = '<command name="MoveAbs" axis="%s" Acceleration="0.1" Deceleration="0.1" Velocity="0.1" Direction="Auto" Position="%.3f" />' \
     %(axes[axis], pos)
     xmls = xmls.replace("\n","")
-    print(xmls)
+    # print(xmls)
     msg = bytes(xmls,"UTF-8")
     self.socket.send(msg)
+    while self.get_position(axis) != pos:
+      time.sleep(0.1)
 
   def get_position(self, axis: str) -> float:
     xmls = '<state><section name="Axis %s"><query name="System Position" /></section></state>' \
     %(axes[axis]) 
-    print(xmls)
+    # print(xmls)
     msg = bytes(xmls,"UTF-8")
     self.socket.send(msg)
     try:
