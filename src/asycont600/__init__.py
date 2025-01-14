@@ -1,7 +1,9 @@
 
-__version__ = "0.1.0-beta1"
+__version__ = "0.1.0"
 
 import socket
+import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 
 axes = {
   "x"        : "1",
@@ -27,38 +29,47 @@ class Asycont600_2:
     self.TCP_PORT = 4000
     self.socket   = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
-    def connect(self):
+  def connect(self):
       self.socket.connect((self.TCP_IP,self.TCP_PORT))
-    
-    def disconnect(self):
+
+  def disconnect(self):
       self.socket.close()
 
-    def move_abs(self, axis, pos):
-      xmls = """
-      <command name="MoveAbs" 
-       axis="%s" 
-       Acceleration="1" Deceleration="1" 
-       Velocity="0.1" 
-       Direction="Auto" 
-       Position="%.3f" />
-      """%(axes[axis], pos)
-      xmls.replace("\n","")
-      print(xmls)
-      # emsg = bytes(xmls,"UTF-8")
-      # self.socket.send(emsg)
+  def move_abs(self, axis: str, pos: float) -> None:
+    xmls = '<command name="MoveAbs" axis="%s" Acceleration="0.1" Deceleration="0.1" Velocity="0.1" Direction="Auto" Position="%.3f" />' \
+    %(axes[axis], pos)
+    xmls = xmls.replace("\n","")
+    print(xmls)
+    msg = bytes(xmls,"UTF-8")
+    self.socket.send(msg)
 
-    def set_ref0(self, axis):
-      xmls = """
-      <command name="Reference" 
-       axis="%s" 
-       Acceleration="1" Deceleration="1" 
-       NewPosition="0" />
-      """%(axes[axis])
-      xmls.replace("\n","")
-      print(xmls)
+  def get_position(self, axis: str) -> float:
+    xmls = '<state><section name="Axis %s"><query name="System Position" /></section></state>' \
+    %(axes[axis]) 
+    print(xmls)
+    msg = bytes(xmls,"UTF-8")
+    self.socket.send(msg)
+    try:
+      resp = self.socket.recv(4*1024)
+      pos  = float(ElementTree.fromstring(resp.decode()).find("section").find("entry").get("v1"))
+      if axis == "x" or axis == "y" or axis == "z" or axis == "AUT Slide":
+        return round(pos, 3)
+      elif axis == "Pol":
+        return round(pos, 3)
+      else:
+        return round(pos, 2)
+    except:
+      print("Read error")
+      raise 
 
-      # emsg = bytes(xmls,"UTF-8")
-      # self.socket.send(emsg)
+  def set_ref0(self, axis: str) -> None:
+      xmls = '<command name="Reference" axis="Axis %s" NewPosition="0" />' \
+      %(axes[axis])
+      msg = bytes(xmls,"UTF-8")
+      self.socket.send(msg)
+
+    # emsg = bytes(xmls,"UTF-8")
+    # self.socket.send(emsg)
 
 
 
