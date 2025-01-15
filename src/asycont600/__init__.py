@@ -1,5 +1,5 @@
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 import socket
 import time
@@ -16,8 +16,8 @@ axes = {
 }
 
 axes_sped = {
-  "x"        : {"slow": 0.5,   "medi": 1.0,   "fast": 4.0   },
-  "y"        : {"slow": 1.0,   "medi": 4.0,   "fast": 10.0  },
+  "x"        : {"slow": 0.05,  "medi": 0.1,   "fast": 0.4   },
+  "y"        : {"slow": 0.1,   "medi": 0.4,   "fast": 1.0  },
   "z"        : {"slow": 0.010, "medi": 0.015, "fast": 0.020 },
   "Pol"      : {"slow": 10,    "medi": 60,    "fast": 120   },
   "AUT Slide": {"slow": 0.01,  "medi": 0.05,  "fast": 0.2   },
