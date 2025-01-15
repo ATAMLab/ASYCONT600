@@ -1,5 +1,5 @@
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 import socket
 import time
@@ -44,7 +44,37 @@ class Asycont600_2:
     msg = bytes(xmls,"UTF-8")
     self.socket.send(msg)
     while self.get_position(axis) != pos:
-      time.sleep(0.1)
+      time.sleep(0.5)
+
+  def move_abs_slow(self, axis: str, pos: float) -> None:
+    xmls = '<command name="MoveAbs" axis="%s" Acceleration="%s" Deceleration="%s" Velocity="%s" Direction="Auto" Position="%.3f" />' \
+    %(axes[axis], axes_sped[axis]["slow"], axes_sped[axis]["slow"], axes_sped[axis]["slow"], pos)
+    xmls = xmls.replace("\n","")
+    # print(xmls)
+    msg = bytes(xmls,"UTF-8")
+    self.socket.send(msg)
+    while self.get_position(axis) != pos:
+      time.sleep(0.5)    
+
+  def move_abs_intermediate(self, axis: str, pos: float) -> None:
+    xmls = '<command name="MoveAbs" axis="%s" Acceleration="%s" Deceleration="%s" Velocity="%s" Direction="Auto" Position="%.3f" />' \
+    %(axes[axis], axes_sped[axis]["medi"], axes_sped[axis]["medi"], axes_sped[axis]["medi"], pos)
+    xmls = xmls.replace("\n","")
+    # print(xmls)
+    msg = bytes(xmls,"UTF-8")
+    self.socket.send(msg)
+    while self.get_position(axis) != pos:
+      time.sleep(0.5)    
+
+  def move_abs_fast(self, axis: str, pos: float) -> None:
+    xmls = '<command name="MoveAbs" axis="%s" Acceleration="%s" Deceleration="%s" Velocity="%s" Direction="Auto" Position="%.3f" />' \
+    %(axes[axis], axes_sped[axis]["fast"], axes_sped[axis]["fast"], axes_sped[axis]["fast"], pos)
+    xmls = xmls.replace("\n","")
+    # print(xmls)
+    msg = bytes(xmls,"UTF-8")
+    self.socket.send(msg)
+    while self.get_position(axis) != pos:
+      time.sleep(0.5)    
 
   def get_position(self, axis: str) -> float:
     xmls = '<state><section name="Axis %s"><query name="System Position" /></section></state>' \
